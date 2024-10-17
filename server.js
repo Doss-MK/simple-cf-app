@@ -1,6 +1,7 @@
 const http = require('http');
 
-const hostname = '127.0.0.1';
+// Change the hostname to '0.0.0.0'
+const hostname = '0.0.0.0'; // Listen on all interfaces
 const port = 3000;
 
 const server = http.createServer((req, res) => {
@@ -9,6 +10,7 @@ const server = http.createServer((req, res) => {
     res.end('Hello World\n');
 });
 
+// Listen on the updated hostname
 server.listen(port, hostname, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
