@@ -1,6 +1,6 @@
-name: Push-to-EC2
+name: Push-to-Local-Ubuntu
 
-# Trigger deployment only on push to the main branch
+# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -8,49 +8,21 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2 on main branch push
+    name: Deploy to Local Ubuntu on main branch push
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the repository
+      - name: Checkout the files
         uses: actions/checkout@v2
 
-      # Deploy files to the server using ssh-deploy
-      - name: Deploy to Server 1
-        uses: easingthemes/ssh-deploy@main
-        with:
-          remote_host: 172.26.91.24   # Server IP address
-          remote_user: mitrah095      # Server username
-          ssh_private_key: |
-            -----BEGIN OPENSSH PRIVATE KEY-----
-            b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDslum1g7
-            nXst4N4tUJ2OvJAAAAGAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIB4+71CUUxPrXRPx
-            FxrkMC7hxpP7Nj9XbTb6NcnHnPmhAAAAoEuRcjDcGOKyyfsF2DSheIienn8U0W27fRs1LI
-            mGuSKQDsdQe4zOAkFAtHK4XS9mC01XVi13vOcqZcQ4H9wkHfl1AChFs76qhTzY/nCvVxoC
-            B21Z168Lr2NfEWh6jjmivwWY2VVJdDrcaNjdIMrCDoBl3bnZP3J26RXoekkopOqIj1P0ZU
-            Y9L7/JrOR8rjc9v+jqOQHidpFxw7zQnrDjRtg=
-            -----END OPENSSH PRIVATE KEY-----
-          target: /var/www/html      # Adjust if needed
-
-      # Execute remote commands on the server via SSH
-      - name: Execute remote commands
-        uses: appleboy/ssh-action@master
-        with:
-          host: 172.26.91.24          # Server IP address
-          username: mitrah095          # Server username
-          key: |
-            -----BEGIN OPENSSH PRIVATE KEY-----
-            b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDslum1g7
-            nXst4N4tUJ2OvJAAAAGAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIB4+71CUUxPrXRPx
-            FxrkMC7hxpP7Nj9XbTb6NcnHnPmhAAAAoEuRcjDcGOKyyfsF2DSheIienn8U0W27fRs1LI
-            mGuSKQDsdQe4zOAkFAtHK4XS9mC01XVi13vOcqZcQ4H9wkHfl1AChFs76qhTzY/nCvVxoC
-            B21Z168Lr2NfEWh6jjmivwWY2VVJdDrcaNjdIMrCDoBl3bnZP3J26RXoekkopOqIj1P0ZU
-            Y9L7/JrOR8rjc9v+jqOQHidpFxw7zQnrDjRtg=
-            -----END OPENSSH PRIVATE KEY-----
-          script: |
+      - name: Install Apache and Deploy Files
+        run: |
+          # Make sure to replace with your local machine's IP and username
+          ssh mitrah095@172.26.91.24 << 'EOF'
             sudo apt-get -y update
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            cd /home
+            cd /home/mitrah095  # Replace with the correct path
             sudo mv * /var/www/html
+          EOF
