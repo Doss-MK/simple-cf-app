@@ -1,6 +1,6 @@
 name: Push-to-EC2
 
-# Trigger deployment only on push to main branch
+# Trigger deployment only on push to the main branch
 on:
   push:
     branches:
@@ -8,31 +8,49 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2 on master branch push
+    name: Deploy to EC2 on main branch push
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the files
+      - name: Checkout the repository
         uses: actions/checkout@v2
 
+      # Deploy files to the server using ssh-deploy
       - name: Deploy to Server 1
         uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.TARGET_DIR }}
+        with:
+          remote_host: 172.26.91.24   # Server IP address
+          remote_user: mitrah095      # Server username
+          ssh_private_key: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDslum1g7
+            nXst4N4tUJ2OvJAAAAGAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIB4+71CUUxPrXRPx
+            FxrkMC7hxpP7Nj9XbTb6NcnHnPmhAAAAoEuRcjDcGOKyyfsF2DSheIienn8U0W27fRs1LI
+            mGuSKQDsdQe4zOAkFAtHK4XS9mC01XVi13vOcqZcQ4H9wkHfl1AChFs76qhTzY/nCvVxoC
+            B21Z168Lr2NfEWh6jjmivwWY2VVJdDrcaNjdIMrCDoBl3bnZP3J26RXoekkopOqIj1P0ZU
+            Y9L7/JrOR8rjc9v+jqOQHidpFxw7zQnrDjRtg=
+            -----END OPENSSH PRIVATE KEY-----
+          target: /var/www/html      # Adjust if needed
 
-      - name: Executing remote ssh commands using ssh key
+      # Execute remote commands on the server via SSH
+      - name: Execute remote commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST_DNS }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: 172.26.91.24          # Server IP address
+          username: mitrah095          # Server username
+          key: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABDslum1g7
+            nXst4N4tUJ2OvJAAAAGAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIB4+71CUUxPrXRPx
+            FxrkMC7hxpP7Nj9XbTb6NcnHnPmhAAAAoEuRcjDcGOKyyfsF2DSheIienn8U0W27fRs1LI
+            mGuSKQDsdQe4zOAkFAtHK4XS9mC01XVi13vOcqZcQ4H9wkHfl1AChFs76qhTzY/nCvVxoC
+            B21Z168Lr2NfEWh6jjmivwWY2VVJdDrcaNjdIMrCDoBl3bnZP3J26RXoekkopOqIj1P0ZU
+            Y9L7/JrOR8rjc9v+jqOQHidpFxw7zQnrDjRtg=
+            -----END OPENSSH PRIVATE KEY-----
           script: |
             sudo apt-get -y update
             sudo apt-get install -y apache2
             sudo systemctl start apache2
             sudo systemctl enable apache2
-            cd home
+            cd /home
             sudo mv * /var/www/html
